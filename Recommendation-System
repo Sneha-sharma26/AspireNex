@@ -1,0 +1,53 @@
+
+import pandas as pd
+# Dataset
+data = {
+    'user_id': [1, 1, 1, 2, 2, 3, 3, 3, 4, 4],
+    'movie_id': ['M1', 'M2', 'M3', 'M1', 'M3', 'M2', 'M4', 'M5', 'M3', 'M5'],
+    'rating': [5, 4, 2, 3, 1, 5, 4, 3, 2, 1]
+}
+df = pd.DataFrame(data)
+print(df)
+
+# calculate similarities between users based on their ratings using cosine similarity or another metric
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+# Pivot table of users vs movies
+pivot = df.pivot_table(index='user_id', columns='movie_id', values='rating', fill_value=0)
+# Compute cosine similarity between users
+user_similarity = cosine_similarity(pivot)
+user_similarity_df = pd.DataFrame(user_similarity, index=pivot.index, columns=pivot.index)
+print("User Similarity Matrix:")
+print(user_similarity_df)
+
+def recommend_movies(user_id, top_n=5):
+    # Get movies already rated by the user
+    movies_rated = df[df['user_id'] == user_id]['movie_id'].unique()
+    # Initialize a dictionary to store movie scores
+    movie_scores = {}
+    # Iterate over similar users
+    for similar_user, similarity_score in user_similarity_df[user_id].iteritems():
+        if similar_user == user_id:
+            continue
+        
+        # Get movies rated by the similar user
+        similar_user_movies = df[df['user_id'] == similar_user]
+        
+        # Iterate over these movies
+        for index, row in similar_user_movies.iterrows():
+            if row['movie_id'] not in movies_rated:
+                if row['movie_id'] not in movie_scores:
+                    movie_scores[row['movie_id']] = 0
+                movie_scores[row['movie_id']] += row['rating'] * similarity_score
+    
+    # Sort movie scores in descending order
+    sorted_scores = sorted(movie_scores.items(), key=lambda x: x[1], reverse=True)
+    
+    # Get top recommendations
+    top_recommendations = [movie for movie, score in sorted_scores[:top_n]]
+    
+    return top_recommendations
+
+# Example: Recommend movies for user_id 1
+recommendations = recommend_movies(user_id=1, top_n=3)
+print(f"Recommendations for user 1: {recommendations}")
