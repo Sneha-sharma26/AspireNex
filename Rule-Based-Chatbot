@@ -1,0 +1,24 @@
+# Importing Python's 're' module for simple pattern matching using regular expressions. Each regular expression looks for specific keywords or patterns in the user's message
+import re
+
+def respond(message):
+    # Convert the message to lowercase for case insensitivity
+    message = message.lower()
+    
+    if re.search(r'\b(hi|hello|hey)\b', message):
+        return "Hello! How can I help you today?"
+    elif re.search(r'\b(how are you|how\'s it going)\b', message):
+        return "I'm just a bot, but I'm here to assist you!"
+    elif re.search(r'\b(weather|temperature)\b', message):
+        return "The weather is nice today."
+    elif re.search(r'\b(thank you|thanks)\b', message):
+        return "You're welcome!"
+    else:
+        return "I'm sorry, I don't understand your question."
+
+# Example interaction
+print(respond("Hello"))
+print(respond("How are you doing today?"))
+print(respond("What's the weather like?"))
+print(respond("Thanks for your help!"))
+print(respond("Can you explain quantum physics?"))
